@@ -20,6 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('info')
+        _ = validated_data.pop('user')
         user = User.objects.create(**validated_data)
         UserInfo.objects.create(user=user, **profile_data)
         return user
