@@ -1,0 +1,6 @@
+Django
+django-filter
+djangorestframework
+markdown
+pyyaml
+django-url-filter
