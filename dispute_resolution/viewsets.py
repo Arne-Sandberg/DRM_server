@@ -29,13 +29,14 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_contracts(self, request, pk=None):
         user = self.get_object()
         return Response({
-            'contracts': ContractCaseSerializer(data=user.contracts, many=True)
+            'contracts': ContractCaseSerializer(data=user.contracts,
+                                                many=True).data
         })
 
     @action(methods=['get'], detail=False)
     def self(self, request):
         if request.user.is_authenticated:
-            return Response({'self': UserSerializer(data=request.user)})
+            return Response({'self': UserSerializer(data=request.user).data})
         else:
             return Response({'errors': {'auth': 'You are not authorized'}},
                             status=401)
