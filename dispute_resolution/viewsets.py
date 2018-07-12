@@ -26,12 +26,10 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     @action(methods=['get'], detail=True)
-    def get_contracts(self, request, pk=None):
+    def contracts(self, request, pk=None):
         user = self.get_object()
-        return Response({
-            'contracts': ContractCaseSerializer(user.contracts.all(),
-                                                many=True).data
-        })
+        return Response([ContractCaseSerializer(contract).data
+                         for contract in user.contracts])
 
     @action(methods=['get'], detail=False)
     def self(self, request):
