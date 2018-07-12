@@ -32,6 +32,14 @@ class UserViewSet(viewsets.ModelViewSet):
             'contracts': ContractCaseSerializer(data=user.contracts, many=True)
         })
 
+    @action(methods=['get'], detail=False)
+    def self(self, request):
+        if request.user.is_authenticated:
+            return Response({'self': UserSerializer(data=request.user)})
+        else:
+            return Response({'errors': {'auth': 'You are not authorized'}},
+                            status=401)
+
 
 class ContractCaseViewSet(viewsets.ModelViewSet):
     """
