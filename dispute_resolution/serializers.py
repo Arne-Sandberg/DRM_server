@@ -46,7 +46,7 @@ class ContractCaseSerializer(serializers.ModelSerializer):
         stages_data = validated_data.pop('stages')
         party = validated_data.pop('party')
         contract = ContractCase.objects.create(**validated_data)
-        contract.party = party
+        contract.party.set(party)
         contract.save()
         for data in stages_data:
             ContractStage.objects.create(contract=contract, **data)
