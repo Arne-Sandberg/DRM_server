@@ -57,8 +57,10 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    name = models.CharField(max_length=150, verbose_name='Name')
-    family_name = models.CharField(max_length=150, verbose_name='Family')
+    name = models.CharField(max_length=150, verbose_name='Name',
+                            null=False, blank=False)
+    family_name = models.CharField(max_length=150, verbose_name='Family',
+                                   null=False, blank=False)
 
     active = models.BooleanField(default=True)
     judge = models.BooleanField(default=False)
