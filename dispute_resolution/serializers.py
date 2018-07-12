@@ -37,6 +37,7 @@ class ContractStageSerializer(serializers.ModelSerializer):
 
 class ContractCaseSerializer(serializers.ModelSerializer):
     stages = ContractStageSerializer(many=True)
+    party = UserSerializer(many=True)
 
     class Meta:
         model = ContractCase
