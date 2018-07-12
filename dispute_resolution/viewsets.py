@@ -29,8 +29,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_contracts(self, request, pk=None):
         user = self.get_object()
         return Response({
-            'contracts': ContractCaseSerializer(data=user.contracts.all(),
-                                                many=True).initial_data
+            'contracts': ContractCaseSerializer(user.contracts.all(),
+                                                many=True).data
         })
 
     @action(methods=['get'], detail=False)
