@@ -37,7 +37,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def self(self, request):
         if request.user.is_authenticated:
             user = UserSerializer(self.request.user)
-            if not user.is_valid(): return Response({'err': 'wow'}, status=400)
             return Response({
                 'self': user.data
             })
