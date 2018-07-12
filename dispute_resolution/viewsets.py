@@ -29,7 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def contracts(self, request, pk=None):
         user = self.get_object()
         return Response([ContractCaseSerializer(contract).data
-                         for contract in user.contracts])
+                         for contract in user.contracts.all()])
 
     @action(methods=['get'], detail=False)
     def self(self, request):
