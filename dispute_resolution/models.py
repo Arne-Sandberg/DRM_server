@@ -71,7 +71,8 @@ class User(AbstractBaseUser):
 
     def get_full_name(self):
         # The user is identified by their email address
-        return f'{self.name} {self.family_name}'
+        return '{name} {family_name}'.format(name=self.name,
+                                             family_name=self.family_name)
 
     def get_short_name(self):
         # The user is identified by their email address
