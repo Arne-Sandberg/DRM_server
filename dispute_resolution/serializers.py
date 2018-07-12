@@ -41,6 +41,7 @@ class ContractCaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContractCase
         fields = '__all__'
+        depth = 1
 
     def create(self, validated_data):
         stages_data = validated_data.pop('stages')
