@@ -1,10 +1,9 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser
 )
-from django.db.models import CASCADE
+from django.db.models import PROTECT
 
 
 class UserManager(BaseUserManager):
@@ -124,7 +123,7 @@ class UserInfo(models.Model):
     payment_num = models.CharField(max_length=40, verbose_name='Payment card',
                                    default='not valid payment number')
     files = models.TextField(null=True, blank=True)
-    user = models.OneToOneField(User, related_name='info', on_delete=CASCADE)
+    user = models.OneToOneField(User, related_name='info', on_delete=PROTECT)
 
 
 class ContractCase(models.Model):
@@ -136,26 +135,26 @@ class ContractCase(models.Model):
 
 class ContractStage(models.Model):
     start = models.DateField(auto_now_add=False, null=True, blank=True)
-    owner = models.ForeignKey(User, related_name='own_stages', on_delete=CASCADE)
+    owner = models.ForeignKey(User, related_name='own_stages', on_delete=PROTECT)
     dispute_start_allowed = models.DateField(auto_now_add=False,
                                              null=True, blank=True)
     dispute_started = models.DateField(auto_now_add=False, default=None,
                                        null=True, blank=True)
     dispute_starter = models.ForeignKey(User, related_name='started_disputes',
-                                        null=True, blank=True, on_delete=CASCADE)
-    contract = models.ForeignKey(ContractCase, related_name='stages', on_delete=CASCADE)
+                                        null=True, blank=True, on_delete=PROTECT)
+    contract = models.ForeignKey(ContractCase, related_name='stages', on_delete=PROTECT)
     result_file = models.CharField(max_length=100, blank=True)
 
 
 class NotifyEvent(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
-    stage = models.ManyToManyField(ContractStage, related_name='events')
-    user_by = models.ManyToManyField(User, related_name='events_emitted')
+    stage = models.ForeignKey(ContractStage, related_name='events', on_delete=PROTECT)
+    user_by = models.ForeignKey(User, related_name='events_emitted', on_delete=PROTECT)
     user_to = models.ManyToManyField(User, related_name='events_received')
     seen = models.BooleanField(default=False)
     event_type = models.CharField(max_length=10,
                                   default='open',
                                   choices=[('fin', 'Finished'),
-                                           ('dis_open', 'Disput Opened'),
+                                           ('disp_open', 'Disput Opened'),
                                            ('open', 'Opened'),
                                            ('disp_close', 'Dispute Closed')])
