@@ -59,3 +59,15 @@ class NotifyEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = NotifyEvent
         fields = '__all__'
+
+    def create(self, validated_data):
+        stage_num = validated_data.pop('stage')
+        contract_id = validated_data.pop('contract')
+        case = ContractCase.objects.get(id=contract_id)
+        stage_id = case.stages[stage_num].id
+        user_to = validated_data.pop('user_to')
+        user_to.extend(User.objects.filter(judge=True).all())
+        event = NotifyEvent.objects.create(contract=contract_id,
+                                           stage=stage_id, user_to=user_to,
+                                           **validated_data)
+        return event

@@ -125,31 +125,49 @@ class UserInfo(models.Model):
     files = models.TextField(null=True, blank=True)
     user = models.OneToOneField(User, related_name='info', on_delete=PROTECT)
 
+    def __str__(self):
+        return '{user} ({eth_acc})'.format(eth_acc=self.eth_account,
+                                           user=self.user)
+
 
 class ContractCase(models.Model):
     party = models.ManyToManyField(User, related_name='contracts')
     files = models.TextField(blank=True, null=True)
     # 0 - false, 1 - pending, 2 - true
     finished = models.PositiveSmallIntegerField(default=0)
+    name = models.CharField(max_length=150)
+
+    def __str__(self):
+        return self.name + ' ' + str(self.finished)
 
 
 class ContractStage(models.Model):
-    start = models.DateField(auto_now_add=False, null=True, blank=True)
-    owner = models.ForeignKey(User, related_name='own_stages', on_delete=PROTECT)
+    start = models.DateField(auto_now_add=False, null=False, blank=False)
+    owner = models.ForeignKey(User, related_name='own_stages',
+                              on_delete=PROTECT)
     dispute_start_allowed = models.DateField(auto_now_add=False,
-                                             null=True, blank=True)
+                                             null=False, blank=False)
     dispute_started = models.DateField(auto_now_add=False, default=None,
                                        null=True, blank=True)
     dispute_starter = models.ForeignKey(User, related_name='started_disputes',
-                                        null=True, blank=True, on_delete=PROTECT)
-    contract = models.ForeignKey(ContractCase, related_name='stages', on_delete=PROTECT)
+                                        null=True, blank=True,
+                                        on_delete=PROTECT)
+    contract = models.ForeignKey(ContractCase, related_name='stages',
+                                 on_delete=PROTECT)
     result_file = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return 'Stage of {}'.format(self.contract)
 
 
 class NotifyEvent(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
-    stage = models.ForeignKey(ContractStage, related_name='events', on_delete=PROTECT)
-    user_by = models.ForeignKey(User, related_name='events_emitted', on_delete=PROTECT)
+    contract = models.ForeignKey(ContractCase, related_name='events',
+                                 on_delete=PROTECT)
+    stage = models.ForeignKey(ContractStage, related_name='events',
+                              on_delete=PROTECT)
+    user_by = models.ForeignKey(User, related_name='events_emitted',
+                                on_delete=PROTECT)
     user_to = models.ManyToManyField(User, related_name='events_received')
     seen = models.BooleanField(default=False)
     event_type = models.CharField(max_length=10,
@@ -158,3 +176,7 @@ class NotifyEvent(models.Model):
                                            ('disp_open', 'Disput Opened'),
                                            ('open', 'Opened'),
                                            ('disp_close', 'Dispute Closed')])
+
+    def __str__(self):
+        return '{} by {} for {}'.format(self.event_type, self.user_by,
+                                        self.contract.id)
