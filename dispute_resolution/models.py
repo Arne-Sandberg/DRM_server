@@ -138,7 +138,7 @@ class ContractCase(models.Model):
     name = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
-        return self.name + ' ' + str(self.finished)
+        return str(self.name) + ' ' + str(self.finished)
 
 
 class ContractStage(models.Model):
