@@ -114,9 +114,9 @@ class User(AbstractBaseUser):
 
 
 class UserInfo(models.Model):
-    eth_account = models.CharField(max_length=65, verbose_name='ETH Address',
+    eth_account = models.CharField(max_length=70, verbose_name='ETH Address',
                                    unique=True, db_index=True)
-    organization_name = models.CharField(max_length=45, default='Some org',
+    organization_name = models.CharField(max_length=150, default='Some org',
                                          verbose_name='Organization')
     tax_num = models.CharField(max_length=15, verbose_name='TAX Identity',
                                null=True, blank=True)
