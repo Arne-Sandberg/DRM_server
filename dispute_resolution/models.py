@@ -135,7 +135,7 @@ class ContractCase(models.Model):
     files = models.TextField(blank=True, null=True)
     # 0 - false, 1 - pending, 2 - true
     finished = models.PositiveSmallIntegerField(default=0)
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
         return self.name + ' ' + str(self.finished)
