@@ -19,8 +19,7 @@ class UserViewSet(viewsets.ModelViewSet):
     A viewset that provides the standard actions
     """
     filter_backends = [DjangoFilterBackend]
-    filter_fields = ['name', 'family_name', 'email', 'judge',
-                     'info__eth_account', 'info__organization_name']
+    filter_fields = ['name', 'family_name', 'email', 'judge']
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
