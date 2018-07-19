@@ -133,12 +133,15 @@ class UserInfo(models.Model):
 class ContractCase(models.Model):
     party = models.ManyToManyField(User, related_name='contracts')
     files = models.TextField(blank=True, null=True)
-    # 0 - false, 1 - pending, 2 - true
-    finished = models.PositiveSmallIntegerField(default=0)
+    finished = models.PositiveSmallIntegerField(default=0,
+                                                choices=[(0, 'Not finished'),
+                                                         (1, 'Pending'),
+                                                         (2, 'Finished')])
     name = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
-        return str(self.name) + ' ' + str(self.finished)
+        return '[{id}] {name} ({state})'.format(id=self.id, name=self.name,
+                                                state=self.finished)
 
 
 class ContractStage(models.Model):
@@ -179,4 +182,4 @@ class NotifyEvent(models.Model):
 
     def __str__(self):
         return '{} by {} for {}'.format(self.event_type, self.user_by,
-                                        self.contract.id)
+                                        self.contract)
