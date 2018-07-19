@@ -1,3 +1,4 @@
+from django.db.models import Max
 from rest_framework import serializers
 
 from dispute_resolution.models import UserInfo, User, ContractCase, \
@@ -37,7 +38,11 @@ class ContractStageSerializer(serializers.ModelSerializer):
 
 class ContractCaseSerializer(serializers.ModelSerializer):
     stages = ContractStageSerializer(many=True)
-    party = UserSerializer(many=True)
+    party = serializers.ListField(
+        child=serializers.IntegerField(min_value=0,
+                                       max_value=User.objects.all()
+                                       .aggregate(Max('id')))
+    )
 
     class Meta:
         model = ContractCase
