@@ -39,9 +39,7 @@ class ContractStageSerializer(serializers.ModelSerializer):
 class ContractCaseSerializer(serializers.ModelSerializer):
     stages = ContractStageSerializer(many=True)
     party = serializers.ListField(
-        child=serializers.IntegerField(min_value=0,
-                                       max_value=User.objects.all()
-                                       .aggregate(Max('id')))
+        child=serializers.IntegerField(min_value=0)
     )
 
     class Meta:
