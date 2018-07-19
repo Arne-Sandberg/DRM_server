@@ -20,7 +20,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     filter_backends = [DjangoFilterBackend]
     filter_fields = ['name', 'family_name', 'email', 'judge',
-                     'info__eth_address', 'info__organization_name']
+                     'info__eth_account', 'info__organization_name']
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
