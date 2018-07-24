@@ -38,9 +38,10 @@ class ContractStageSerializer(serializers.ModelSerializer):
 
 class ContractCaseSerializer(serializers.ModelSerializer):
     stages = ContractStageSerializer(many=True)
-    party = serializers.ListField(
-        child=serializers.IntegerField(min_value=0)
-    )
+    in_party = UserSerializer(many=True, read_only=True, source='party')
+    party = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),
+                                               many=True, write_only=True,
+                                               allow_empty=False)
 
     class Meta:
         model = ContractCase
@@ -49,10 +50,7 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         stages_data = validated_data.pop('stages')
-        party = validated_data.pop('party')
-        contract = ContractCase.objects.create(**validated_data)
-        contract.party.set(party)
-        contract.save()
+        contract = super().create(validated_data)
         for data in stages_data:
             ContractStage.objects.create(contract=contract, **data)
         return contract
