@@ -30,6 +30,10 @@ class UserSerializer(serializers.ModelSerializer):
         UserInfo.objects.create(user=user, **profile_data)
         return user
 
+    def update(self, instance, validated_data):
+        _ = validated_data.pop('password')
+        return super().update(instance, validated_data)
+
 
 class ContractStageSerializer(serializers.ModelSerializer):
     class Meta:
