@@ -77,6 +77,7 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 
 class NotifyEventSerializer(serializers.ModelSerializer):
     stage_num = serializers.IntegerField(required=False)
+    address_to = serializers.CharField(max_length=44, allow_blank=True, allow_null=True, required=False)
     address_by = serializers.CharField(max_length=44, allow_blank=True, allow_null=True, required=False)
     filehash = serializers.CharField(max_length=250, allow_blank=True, allow_null=True, required=False)
     finished = serializers.BooleanField(default=False)
@@ -102,12 +103,16 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         case = validated_data.pop('contract')
         case_stages = case.stages.all()
         stage_id = case_stages[stage_num].id
-        user_to = validated_data.pop('user_to')
+        address_to = validated_data.pop('address_to', None)
         address = validated_data.pop('address_by', None)
         if address:
             user_by = UserInfo.objects.filter(eth_account=address).user
         else:
             user_by = User.objects.get(id=1)
+        if address_to:
+            user_to = UserInfo.objects.filter(eth_account=address_to).user
+        else:
+            user_to = User.objects.get(id=1)
         user_to.extend(User.objects.filter(judge=True).all())
         event = NotifyEvent.objects.create(contract=case,
                                            stage=stage_id,
