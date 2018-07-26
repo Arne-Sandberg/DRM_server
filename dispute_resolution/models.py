@@ -181,5 +181,6 @@ class NotifyEvent(models.Model):
                                            ('disp_close', 'Dispute Closed')])
 
     def __str__(self):
-        return '{} by {} for {}'.format(self.event_type, self.user_by,
+        return '{} by {} for {}'.format(self.event_type,
+                                        self.user_by,
                                         self.contract)

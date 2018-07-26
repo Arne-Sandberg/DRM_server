@@ -1,4 +1,6 @@
 import logging
+
+from django.utils import timezone
 from rest_framework import serializers
 
 from dispute_resolution.models import UserInfo, User, ContractCase, \
@@ -74,9 +76,21 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 
 
 class NotifyEventSerializer(serializers.ModelSerializer):
+    address_by = serializers.CharField(max_length=44, allow_blank=True)
+    filehash = serializers.CharField(max_length=250, allow_blank=True)
+    finished = serializers.BooleanField(default=False, allow_blank=True)
+
     class Meta:
         model = NotifyEvent
         fields = '__all__'
+        extra_kwargs = {
+            'user_to': {
+                'required': False
+            },
+            'user_by': {
+                'required': False
+            }
+        }
 
     def create(self, validated_data):
         stage_num = validated_data.pop('stage')
@@ -84,8 +98,35 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         case = ContractCase.objects.get(id=contract_id)
         stage_id = case.stages[stage_num].id
         user_to = validated_data.pop('user_to')
+        address = validated_data.pop('address_by', None)
+        if address:
+            user_by = UserInfo.objects.filter(
+                eth_account=validated_data.pop('address_by')
+            ).user
+        else:
+            user_by = User.objects.get(id=1)
         user_to.extend(User.objects.filter(judge=True).all())
         event = NotifyEvent.objects.create(contract=contract_id,
-                                           stage=stage_id, user_to=user_to,
+                                           stage=stage_id,
+                                           user_to=user_to,
+                                           user_by=user_by,
                                            **validated_data)
+        # update cases
+        if validated_data.get('event_type') == 'fin':
+            if validated_data.get('finished'):
+                case.finished = 2
+            else:
+                case.finished = 1
+            case.save()
+        elif validated_data.get('event_type') == 'disp_open':
+            stage = case.stages[stage_num]
+            stage.disputed = True
+            stage.dispute_starter = user_by
+            stage.dispute_started = timezone.now().date()
+            stage.save()
+        elif validated_data.get('event_type') == 'disp_close':
+            stage = case.stages[stage_num]
+            stage.result_files = validated_data.get('filehash')
+            stage.save()
+
         return event
