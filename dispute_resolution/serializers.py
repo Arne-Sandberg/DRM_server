@@ -132,7 +132,7 @@ class NotifyEventSerializer(serializers.ModelSerializer):
                 case.finished = 1
             case.save()
         elif validated_data.get('event_type') == 'disp_open':
-            stage = case.stages[stage_num]
+            stage = case_stages[stage_num]
             stage.disputed = True
             stage.dispute_starter = user_by
             stage.dispute_started = timezone.now().date()
