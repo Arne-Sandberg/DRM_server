@@ -76,8 +76,9 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 
 
 class NotifyEventSerializer(serializers.ModelSerializer):
-    address_by = serializers.CharField(max_length=44, allow_blank=True)
-    filehash = serializers.CharField(max_length=250, allow_blank=True)
+    stage = serializers.IntegerField(required=False)
+    address_by = serializers.CharField(max_length=44, allow_blank=True, allow_null=True, required=False)
+    filehash = serializers.CharField(max_length=250, allow_blank=True, allow_null=True, required=False)
     finished = serializers.BooleanField(default=False)
 
     class Meta:
@@ -88,6 +89,9 @@ class NotifyEventSerializer(serializers.ModelSerializer):
                 'required': False
             },
             'user_by': {
+                'required': False
+            },
+            'stage': {
                 'required': False
             }
         }

@@ -35,7 +35,11 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.user.is_authenticated:
             user = UserSerializer(self.request.user)
             return Response({
-                'self': user.data
+                'self': user.data,
+                'events': NotifyEvent.objects.filter(
+                    seen=False,
+                    user_to__in=self.request.user
+                )
             })
         else:
             return Response({'errors': {'auth': 'You are not authorized'}},
