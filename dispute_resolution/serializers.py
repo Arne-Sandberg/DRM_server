@@ -117,6 +117,8 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         event = NotifyEvent.objects.create(contract=case,
                                            stage=ContractStage.objects.get(pk=stage_id),
                                            user_to=[User.objects.get(pk=uid)
+                                                    if type(uid) is not User
+                                                    else uid
                                                     for uid in user_to],
                                            user_by=user_by,
                                            **validated_data)
