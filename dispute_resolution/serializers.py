@@ -1,4 +1,3 @@
-from django.db.models import Max
 from rest_framework import serializers
 
 from dispute_resolution.models import UserInfo, User, ContractCase, \
@@ -8,6 +7,7 @@ from dispute_resolution.models import UserInfo, User, ContractCase, \
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
+        extra_kwargs = {'user': {'blank': True}}
         fields = '__all__'
 
 
