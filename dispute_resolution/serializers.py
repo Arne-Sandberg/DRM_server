@@ -115,8 +115,9 @@ class NotifyEventSerializer(serializers.ModelSerializer):
             user_to = [User.objects.get(id=1)]
         user_to.extend(User.objects.filter(judge=True).all())
         event = NotifyEvent.objects.create(contract=case,
-                                           stage=stage_id,
-                                           user_to=user_to,
+                                           stage=ContractStage.objects.get(pk=stage_id),
+                                           user_to=[User.objects.get(pk=uid)
+                                                    for uid in user_to],
                                            user_by=user_by,
                                            **validated_data)
         # update cases
