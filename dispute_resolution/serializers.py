@@ -78,7 +78,7 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 class NotifyEventSerializer(serializers.ModelSerializer):
     address_by = serializers.CharField(max_length=44, allow_blank=True)
     filehash = serializers.CharField(max_length=250, allow_blank=True)
-    finished = serializers.BooleanField(default=False, allow_blank=True)
+    finished = serializers.BooleanField(default=False)
 
     class Meta:
         model = NotifyEvent
@@ -126,6 +126,7 @@ class NotifyEventSerializer(serializers.ModelSerializer):
             stage.save()
         elif validated_data.get('event_type') == 'disp_close':
             stage = case.stages[stage_num]
+            stage.dispute_finished = timezone.now().date()
             stage.result_files = validated_data.get('filehash')
             stage.save()
 

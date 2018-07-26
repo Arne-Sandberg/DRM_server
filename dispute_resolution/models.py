@@ -152,6 +152,8 @@ class ContractStage(models.Model):
                                              null=False, blank=False)
     dispute_started = models.DateField(auto_now_add=False, default=None,
                                        null=True, blank=True)
+    dispute_finished = models.DateField(auto_now_add=False, default=None,
+                                        null=True, blank=True)
     dispute_starter = models.ForeignKey(User, related_name='started_disputes',
                                         null=True, blank=True,
                                         on_delete=PROTECT)
