@@ -31,12 +31,13 @@ class UserSerializer(serializers.ModelSerializer):
         _ = validated_data.pop('staff', None)
         _ = validated_data.pop('admin', None)
         _ = validated_data.pop('judge', None)
-        pwd = validated_data.pop('password')
+        pwd = validated_data.pop('password', None)
         logger.info('Creating user %s', validated_data['email'])
         user = User.objects.create(**validated_data)
         if pwd:
             logger.debug('Set password for %s', user)
             user.set_password(pwd)
+            user.save()
         logger.debug('Create info object for %s', user)
         UserInfo.objects.create(user=user, **profile_data)
         return user
