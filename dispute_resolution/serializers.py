@@ -116,12 +116,13 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         user_to.extend(User.objects.filter(judge=True).all())
         event = NotifyEvent.objects.create(contract=case,
                                            stage=ContractStage.objects.get(pk=stage_id),
-                                           user_to=[User.objects.get(pk=uid)
-                                                    if type(uid) is not User
-                                                    else uid
-                                                    for uid in user_to],
                                            user_by=user_by,
                                            **validated_data)
+        event.user_to.set([User.objects.get(pk=uid)
+                           if type(uid) is not User else uid
+                           for uid in user_to])
+        event.save()
+
         # update cases
         if validated_data.get('event_type') == 'fin':
             if validated_data.get('finished'):
