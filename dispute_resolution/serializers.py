@@ -100,7 +100,8 @@ class NotifyEventSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         stage_num = validated_data.pop('stage_num')
         case = validated_data.pop('contract')
-        stage_id = case.stages[stage_num].id
+        case_stages = case.stages.all()
+        stage_id = case_stages[stage_num].id
         user_to = validated_data.pop('user_to')
         address = validated_data.pop('address_by', None)
         if address:
