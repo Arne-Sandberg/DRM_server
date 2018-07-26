@@ -124,8 +124,8 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         event.save()
 
         # update cases
-        if validated_data.get('event_type') == 'fin':
-            if validated_data.get('finished'):
+        if validated_data.get('event_type', None) == 'fin':
+            if validated_data.get('finished', None):
                 case.finished = 2
             else:
                 case.finished = 1
