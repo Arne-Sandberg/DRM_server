@@ -37,7 +37,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({
                 'self': user.data,
                 'events': [
-                    NotifyEventSerializer(event)
+                    NotifyEventSerializer(event).data
                     for event in NotifyEvent.objects.filter(
                         seen=False,
                         user_to__in=[self.request.user]
