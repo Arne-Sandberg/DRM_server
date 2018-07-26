@@ -38,7 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'self': user.data,
                 'events': NotifyEvent.objects.filter(
                     seen=False,
-                    user_to__in=self.request.user
+                    user_to__in=[self.request.user]
                 )
             })
         else:
