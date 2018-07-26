@@ -22,16 +22,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('info')
-        _ = validated_data.pop('user')
-        _ = validated_data.pop('staff')
-        _ = validated_data.pop('admin')
-        _ = validated_data.pop('judge')
+        _ = profile_data.pop('user', None)
+        _ = validated_data.pop('user', None)
+        _ = validated_data.pop('staff', None)
+        _ = validated_data.pop('admin', None)
+        _ = validated_data.pop('judge', None)
         user = User.objects.create(**validated_data)
         UserInfo.objects.create(user=user, **profile_data)
         return user
 
     def update(self, instance, validated_data):
-        _ = validated_data.pop('password')
+        _ = validated_data.pop('password', None)
         return super().update(instance, validated_data)
 
 
