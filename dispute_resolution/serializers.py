@@ -7,7 +7,7 @@ from dispute_resolution.models import UserInfo, User, ContractCase, \
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInfo
-        extra_kwargs = {'user': {'blank': True}}
+        extra_kwargs = {'user': {'allow_blank': True, 'required': False}}
         fields = '__all__'
 
 
