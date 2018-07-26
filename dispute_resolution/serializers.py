@@ -1,7 +1,11 @@
+import logging
 from rest_framework import serializers
 
 from dispute_resolution.models import UserInfo, User, ContractCase, \
     ContractStage, NotifyEvent
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -27,7 +31,13 @@ class UserSerializer(serializers.ModelSerializer):
         _ = validated_data.pop('staff', None)
         _ = validated_data.pop('admin', None)
         _ = validated_data.pop('judge', None)
+        pwd = validated_data.pop('password')
+        logger.info('Creating user %s', validated_data['email'])
         user = User.objects.create(**validated_data)
+        if pwd:
+            logger.debug('Set password for %s', user)
+            user.set_password(pwd)
+        logger.debug('Create info object for %s', user)
         UserInfo.objects.create(user=user, **profile_data)
         return user
 
