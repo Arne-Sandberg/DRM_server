@@ -106,11 +106,11 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         address_to = validated_data.pop('address_to', None)
         address = validated_data.pop('address_by', None)
         if address:
-            user_by = UserInfo.objects.filter(eth_account=address).user
+            user_by = UserInfo.objects.get(eth_account=address).user
         else:
             user_by = User.objects.get(id=1)
         if address_to:
-            user_to = UserInfo.objects.filter(eth_account=address_to).user
+            user_to = UserInfo.objects.get(eth_account=address_to).user
         else:
             user_to = User.objects.get(id=1)
         user_to.extend(User.objects.filter(judge=True).all())
