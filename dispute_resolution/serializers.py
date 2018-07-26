@@ -105,6 +105,7 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         stage_id = case_stages[stage_num].id
         address_to = validated_data.pop('address_to', None)
         address = validated_data.pop('address_by', None)
+        finished = validated_data.pop('finished', None)
         if address:
             user_by = UserInfo.objects.get(eth_account=address).user
         else:
@@ -125,7 +126,7 @@ class NotifyEventSerializer(serializers.ModelSerializer):
 
         # update cases
         if validated_data.get('event_type', None) == 'fin':
-            if validated_data.get('finished', None):
+            if finished:
                 case.finished = 2
             else:
                 case.finished = 1
@@ -137,7 +138,7 @@ class NotifyEventSerializer(serializers.ModelSerializer):
             stage.dispute_started = timezone.now().date()
             stage.save()
         elif validated_data.get('event_type') == 'disp_close':
-            stage = case.stages[stage_num]
+            stage = case_stages[stage_num]
             stage.dispute_finished = timezone.now().date()
             stage.result_files = validated_data.get('filehash')
             stage.save()
