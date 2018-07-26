@@ -76,7 +76,7 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 
 
 class NotifyEventSerializer(serializers.ModelSerializer):
-    stage = serializers.IntegerField(required=False)
+    stage_num = serializers.IntegerField(required=False)
     address_by = serializers.CharField(max_length=44, allow_blank=True, allow_null=True, required=False)
     filehash = serializers.CharField(max_length=250, allow_blank=True, allow_null=True, required=False)
     finished = serializers.BooleanField(default=False)
@@ -92,12 +92,12 @@ class NotifyEventSerializer(serializers.ModelSerializer):
                 'required': False
             },
             'stage': {
-                'required': False
+                'read_only': True
             }
         }
 
     def create(self, validated_data):
-        stage_num = validated_data.pop('stage')
+        stage_num = validated_data.pop('stage_num')
         contract_id = validated_data.pop('contract')
         case = ContractCase.objects.get(id=contract_id)
         stage_id = case.stages[stage_num].id
