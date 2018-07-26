@@ -113,7 +113,7 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         if address_to:
             user_to = [UserInfo.objects.get(eth_account=address_to).user]
         else:
-            user_to = set(case.party.all()) - set(user_by)
+            user_to = set(case.party.all()) - {user_by}
         user_to.extend(User.objects.filter(judge=True).all())
         event = NotifyEvent.objects.create(contract=case,
                                            stage=ContractStage.objects.get(pk=stage_id),
