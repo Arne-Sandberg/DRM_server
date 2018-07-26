@@ -92,25 +92,23 @@ class NotifyEventSerializer(serializers.ModelSerializer):
                 'required': False
             },
             'stage': {
-                'read_only': True
+                'read_only': True,
+                'required': False
             }
         }
 
     def create(self, validated_data):
         stage_num = validated_data.pop('stage_num')
-        contract_id = validated_data.pop('contract')
-        case = ContractCase.objects.get(id=contract_id)
+        case = validated_data.pop('contract')
         stage_id = case.stages[stage_num].id
         user_to = validated_data.pop('user_to')
         address = validated_data.pop('address_by', None)
         if address:
-            user_by = UserInfo.objects.filter(
-                eth_account=validated_data.pop('address_by')
-            ).user
+            user_by = UserInfo.objects.filter(eth_account=address).user
         else:
             user_by = User.objects.get(id=1)
         user_to.extend(User.objects.filter(judge=True).all())
-        event = NotifyEvent.objects.create(contract=contract_id,
+        event = NotifyEvent.objects.create(contract=case,
                                            stage=stage_id,
                                            user_to=user_to,
                                            user_by=user_by,
