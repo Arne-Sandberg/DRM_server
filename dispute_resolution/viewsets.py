@@ -41,7 +41,8 @@ class UserViewSet(viewsets.ModelViewSet):
                     for event in NotifyEvent.objects.filter(
                         seen=False,
                         user_to__in=[self.request.user]
-                    ).all()]
+                    ).all()
+                ]
             })
         else:
             return Response({'errors': {'auth': 'You are not authorized'}},

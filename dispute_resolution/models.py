@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser
 )
-from django.db.models import PROTECT
+from django.db.models import PROTECT, CASCADE
 
 
 class UserManager(BaseUserManager):
@@ -123,7 +123,7 @@ class UserInfo(models.Model):
     payment_num = models.CharField(max_length=40, verbose_name='Payment card',
                                    default='not valid payment number')
     files = models.TextField(null=True, blank=True)
-    user = models.OneToOneField(User, related_name='info', on_delete=PROTECT)
+    user = models.OneToOneField(User, related_name='info', on_delete=CASCADE)
 
     def __str__(self):
         return '{user} ({eth_acc})'.format(eth_acc=self.eth_account,
@@ -140,7 +140,8 @@ class ContractCase(models.Model):
     name = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
-        return '[{id}] {name} ({state})'.format(id=self.id, name=self.name,
+        return '[{id}] {name} ({state})'.format(id=self.id,
+                                                name=self.name,
                                                 state=self.finished)
 
 
@@ -158,7 +159,7 @@ class ContractStage(models.Model):
                                         null=True, blank=True,
                                         on_delete=PROTECT)
     contract = models.ForeignKey(ContractCase, related_name='stages',
-                                 on_delete=PROTECT)
+                                 on_delete=CASCADE)
     result_file = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
@@ -168,12 +169,13 @@ class ContractStage(models.Model):
 class NotifyEvent(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
     contract = models.ForeignKey(ContractCase, related_name='events',
-                                 on_delete=PROTECT)
+                                 on_delete=CASCADE)
     stage = models.ForeignKey(ContractStage, related_name='events',
-                              on_delete=PROTECT)
+                              on_delete=CASCADE)
     user_by = models.ForeignKey(User, related_name='events_emitted',
-                                on_delete=PROTECT)
-    user_to = models.ManyToManyField(User, related_name='events_received')
+                                on_delete=CASCADE)
+    user_to = models.ForeignKey(User, related_name='events_received',
+                                on_delete=CASCADE)
     seen = models.BooleanField(default=False)
     event_type = models.CharField(max_length=10,
                                   default='open',
@@ -183,6 +185,7 @@ class NotifyEvent(models.Model):
                                            ('disp_close', 'Dispute Closed')])
 
     def __str__(self):
-        return '{} by {} for {}'.format(self.event_type,
-                                        self.user_by,
-                                        self.contract)
+        return '{} by {} to {} for {}'.format(self.event_type,
+                                              self.user_to,
+                                              self.user_by,
+                                              self.contract)

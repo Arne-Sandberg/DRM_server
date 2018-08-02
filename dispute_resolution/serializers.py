@@ -77,9 +77,12 @@ class ContractCaseSerializer(serializers.ModelSerializer):
 
 class NotifyEventSerializer(serializers.ModelSerializer):
     stage_num = serializers.IntegerField(required=False)
-    address_to = serializers.CharField(max_length=44, allow_blank=True, allow_null=True, required=False)
-    address_by = serializers.CharField(max_length=44, allow_blank=True, allow_null=True, required=False)
-    filehash = serializers.CharField(max_length=250, allow_blank=True, allow_null=True, required=False)
+    address_to = serializers.CharField(max_length=44, allow_blank=True,
+                                       allow_null=True, required=False)
+    address_by = serializers.CharField(max_length=44, allow_blank=True,
+                                       allow_null=True, required=False)
+    filehash = serializers.CharField(max_length=250, allow_blank=True,
+                                     allow_null=True, required=False)
     finished = serializers.BooleanField(default=False)
 
     class Meta:
@@ -95,6 +98,12 @@ class NotifyEventSerializer(serializers.ModelSerializer):
             'stage': {
                 'read_only': True,
                 'required': False
+            },
+            'address_to': {
+                'write_only': True,
+            },
+            'address_by': {
+                'write_only': True,
             }
         }
 
@@ -106,28 +115,31 @@ class NotifyEventSerializer(serializers.ModelSerializer):
         address_to = validated_data.pop('address_to', None)
         address = validated_data.pop('address_by', None)
         finished = validated_data.pop('finished', None)
+
         if address:
             user_by = UserInfo.objects.get(eth_account=address).user
         else:
             user_by = User.objects.get(id=1)
+
         if address_to:
             user_to = [UserInfo.objects.get(eth_account=address_to).user]
         else:
             user_to = list(set(case.party.all()) - {user_by})
         user_to.extend(User.objects.filter(judge=True).all())
-        event = NotifyEvent.objects.create(contract=case,
-                                           stage=ContractStage.objects.get(pk=stage_id),
-                                           user_by=user_by,
-                                           **validated_data)
-        event.user_to.set([User.objects.get(pk=uid)
-                           if type(uid) is not User else uid
-                           for uid in user_to])
-        event.save()
+
+        event = {}
+        for uid in user_to:
+            user = User.objects.get(pk=uid) if type(uid) is not User else uid
+            event = NotifyEvent.objects.create(contract=case,
+                                               stage=ContractStage.objects.get(pk=stage_id),
+                                               user_by=user_by,
+                                               user_to=user,
+                                               **validated_data)
 
         # update cases
-        if validated_data.get('event_type', None) == 'fin':
+        if validated_data.get('event_type') == 'fin':
             if finished:
-                case.finished = 2
+                case.finished = 2  # TODO: use proper ENUM
             else:
                 case.finished = 1
             case.save()
