@@ -189,3 +189,6 @@ class NotifyEvent(models.Model):
                                               self.user_to,
                                               self.user_by,
                                               self.contract)
+
+    class Meta:
+        ordering = ('-id',)
