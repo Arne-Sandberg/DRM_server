@@ -5,3 +5,4 @@ markdown
 pyyaml
 django-url-filter
 django-cors-headers
+django-rest-swagger

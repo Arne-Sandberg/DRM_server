@@ -16,18 +16,22 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from rest_framework import routers
+from rest_framework_swagger.views import get_swagger_view
 
 from dispute_resolution.viewsets import UserViewSet, NotifyEventViewSet, \
     UserInfoViewSet, ContractStageViewSet, ContractCaseViewSet
+
+schema_view = get_swagger_view(title='Dispute Resolution API')
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
 router.register(r'contracts', ContractCaseViewSet)
 router.register(r'stages', ContractStageViewSet)
 router.register(r'userinfo', UserInfoViewSet)
-router.register(r'events', NotifyEventViewSet)
+router.register(r'events', NotifyEventViewSet, base_name='Events')
 urlpatterns = router.urls
 
 urlpatterns += [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', schema_view),
 ]
