@@ -9,6 +9,8 @@ from url_filter.integrations.drf import DjangoFilterBackend
 
 from dispute_resolution.models import User, ContractCase, ContractStage, \
     NotifyEvent, UserInfo
+from dispute_resolution.permissions import CasePermission, \
+    NotificationPermission, StagePermission, UserInfoPermission, UserPermission
 from dispute_resolution.serializers import UserSerializer, \
     ContractCaseSerializer, ContractStageSerializer, NotifyEventSerializer, \
     UserInfoSerializer
@@ -23,6 +25,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    permission_classes = (UserPermission,)
 
     @action(methods=['get'], detail=True)
     def contracts(self, request, pk=None):
@@ -54,7 +58,7 @@ class ContractCaseViewSet(viewsets.ModelViewSet):
     A viewset that provides the standard actions
     """
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, CasePermission)
 
     ordering_fields = ('id', 'finished', 'party')
     ordering = ('finished',)
@@ -71,7 +75,7 @@ class ContractStageViewSet(viewsets.ModelViewSet):
     A viewset that provides the standard actions
     """
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, StagePermission)
 
     filter_backends = [DjangoFilterBackend]
     filter_fields = ['owner', 'dispute_starter']
@@ -85,13 +89,15 @@ class NotifyEventViewSet(viewsets.ModelViewSet):
     A viewset that provides the standard actions
     """
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, NotificationPermission)
 
     filter_backends = [DjangoFilterBackend]
     filter_fields = ['user_to', 'user_by', 'contract', 'stage']
 
-    queryset = NotifyEvent.objects.all()
     serializer_class = NotifyEventSerializer
+
+    def get_queryset(self):
+        return NotifyEvent.objects.filter(user_to=self.request.user).all()
 
 
 class UserInfoViewSet(viewsets.ModelViewSet):
@@ -99,7 +105,7 @@ class UserInfoViewSet(viewsets.ModelViewSet):
     A viewset that provides the standard actions
     """
     authentication_classes = (SessionAuthentication, BasicAuthentication)
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, UserInfoPermission)
 
     filter_backends = [DjangoFilterBackend]
     filter_fields = ['eth_address', 'organization_name', 'tax_num',
