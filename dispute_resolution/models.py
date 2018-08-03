@@ -103,7 +103,7 @@ class User(AbstractBaseUser):
         return self.admin
 
     @property
-    def is_admin(self):
+    def is_judge(self):
         """Is the user a judge member?"""
         return self.judge
 
@@ -186,8 +186,8 @@ class NotifyEvent(models.Model):
 
     def __str__(self):
         return '{} by {} to {} for {}'.format(self.event_type,
-                                              self.user_to,
                                               self.user_by,
+                                              self.user_to,
                                               self.contract)
 
     class Meta:
