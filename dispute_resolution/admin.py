@@ -13,23 +13,31 @@ class UserInfoInline(admin.StackedInline):
     model = UserInfo
 
 
+class CaseInline(admin.TabularInline):
+    model = ContractCase.party.through
+
+
 class UserAdmin(BaseUserAdmin):
     # The forms to add and change user instances
     form = UserAdminChangeForm
     add_form = UserAdminCreationForm
     inlines = [
         UserInfoInline,
+        CaseInline
     ]
 
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'name', 'family_name', 'admin', 'judge',
+    list_display = ('email', 'name', 'family_name', 'admin', 'judge', 'staff',
                     'eth_account', 'org_name', 'taxnum', 'paynum')
     list_filter = ('admin', 'judge', 'staff')
+    list_editable = ('name', 'family_name', 'admin', 'staff')
     list_select_related = (
         'info',
     )
+
+    readonly_fields = ('email',)
 
     fieldsets = (
         (None, {'fields': ('email', 'name', 'family_name', 'password')}),
@@ -52,15 +60,19 @@ class UserAdmin(BaseUserAdmin):
 
     def eth_account(self, obj):
         return getattr(obj.info, 'eth_account', None)
+    eth_account.admin_order_field = 'info__eth_account'
 
     def taxnum(self, obj):
         return getattr(obj.info, 'tax_num', None)
+    taxnum.admin_order_field = 'info__tax_num'
 
     def paynum(self, obj):
         return getattr(obj.info, 'payment_num', None)
+    paynum.admin_order_field = 'info__payment_num'
 
     def org_name(self, obj):
         return getattr(obj.info, 'organization_name', None)
+    org_name.admin_order_field = 'info__organization_name'
 
 
 admin.site.register(User, UserAdmin)
@@ -126,35 +138,73 @@ def admin_link(attr, short_description, many=False, empty_description="-"):
 
 
 class ContractStageAdmin(admin.ModelAdmin):
-    model = ContractStage
+    list_display = ('__str__', 'owner_link', 'case_link',
+                    'dispute_started', 'dispute_finished',
+                    'dispute_starter')
+    list_filter = ('start', 'dispute_start_allowed', 'dispute_started',
+                   'dispute_finished')
+
+    readonly_fields = ('owner', 'dispute_started', 'contract',
+                       'dispute_start_allowed', 'start', 'dispute_starter',
+                       'dispute_finished', 'result_file')
+
+    fieldsets = (
+        (None, {'fields': ('owner', 'start', 'contract',
+                           'dispute_start_allowed')}),
+        ('State', {'fields': ('dispute_started', 'dispute_starter',
+                              'dispute_finished', 'result_file')}),
+    )
+    search_fields = ('start', 'dispute_start_allowed',
+                     'contract__party__email',
+                     'contract__party__info__organization_name',
+                     'contract__party__family_name', 'contract__party__name',
+                     'contract__name',
+                     'contract__party__info__eth_account',
+                     'dispute_started', 'dispute_finished',
+                     'dispute_starter__name',
+                     'result_file')
+
+    @admin_link('owner', 'Owner')
+    def owner_link(self, user):
+        return str(user)
+
+    @admin_link('contract', 'Case')
+    def case_link(self, case):
+        return str(case)
 
 
 admin.site.register(ContractStage, ContractStageAdmin)
 
 
+class UserInline(admin.StackedInline):
+    model = ContractCase.party.through
+
+
 class ContractCaseAdmin(admin.ModelAdmin):
     inlines = [
+        UserInline,
         ContractStageInline,
     ]
 
-    # The fields to be used in displaying the User model.
-    # These override the definitions on the base UserAdmin
-    # that reference specific fields on auth.User.
-    list_display = ('name', 'user_link', 'files', 'stage_link')
+    list_display = ('id', 'name', 'party_link', 'files', 'stage_link')
     list_filter = ('finished',)
+    list_editable = ('name',)
+    list_display_links = ('id', 'files')
+
+    readonly_fields = ('party', 'files', 'stages', 'finished')
 
     fieldsets = (
         (None, {'fields': ('name', 'files')}),
     )
-    search_fields = ('files', 'stages__dispute_start_allowed',
-                     'stages__owner__name',
-                     'stages__owner__info__eth_account')
+    search_fields = ('files', 'name',
+                     'stages__dispute_start_allowed',
+                     'party__name', 'party__family_name',
+                     'party__email', 'party__info__organization_name',
+                     'party__info__tax_num', 'party__info__payment_num',
+                     'party__info__eth_account')
 
-    def parties(self, obj):
-        return '\n'.join(map(str, obj.party.all()))
-
-    @admin_link('party', 'Users', True)
-    def user_link(self, user):
+    @admin_link('party', 'Participants', True)
+    def party_link(self, user):
         return str(user)
 
     @admin_link('stages', 'Stages', True)
@@ -166,7 +216,46 @@ admin.site.register(ContractCase, ContractCaseAdmin)
 
 
 class NotifyEventAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('pk', 'event_type', 'case_link', 'stage_link',
+                    'user_by_link', 'user_to_link', 'seen')
+    list_display_links = ('pk', 'event_type')
+    list_filter = ('event_type', 'seen')
+
+    readonly_fields = ('user_by', 'user_to', 'event_type', 'contract', 'stage')
+
+    fieldsets = (
+        (None, {'fields': ('event_type', 'user_by', 'user_to', 'seen')}),
+        ('Case', {'fields': ('contract', 'stage')}),
+    )
+    search_fields = ('event_type',
+                     'contract__id',
+                     'stage__id',
+                     'contract__party__email',
+                     'contract__party__info__organization_name',
+                     'contract__party__family_name', 'contract__party__name',
+                     'contract__name',
+                     'contract__party__info__eth_account',
+                     'creation_date')
+
+    @admin_link('user_by', 'Sender')
+    def user_by_link(self, user):
+        return str(user)
+    user_by_link.admin_order_field = 'user_by'
+
+    @admin_link('user_to', 'Recipient')
+    def user_to_link(self, user):
+        return str(user)
+    user_to_link.admin_order_field = 'user_to'
+
+    @admin_link('contract', 'Case')
+    def case_link(self, case):
+        return str(case)
+    case_link.admin_order_field = 'contract'
+
+    @admin_link('stage', 'Stage')
+    def stage_link(self, stage):
+        return str(stage)
+    stage_link.admin_order_field = 'stage'
 
 
 admin.site.register(NotifyEvent, NotifyEventAdmin)

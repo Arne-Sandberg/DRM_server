@@ -165,6 +165,10 @@ class ContractStage(models.Model):
     def __str__(self):
         return 'Stage of {}'.format(self.contract)
 
+    @property
+    def dispute_has_started(self):
+        return bool(self.dispute_started)
+
 
 class NotifyEvent(models.Model):
     creation_date = models.DateTimeField(auto_now_add=True)
@@ -179,9 +183,9 @@ class NotifyEvent(models.Model):
     seen = models.BooleanField(default=False)
     event_type = models.CharField(max_length=10,
                                   default='open',
-                                  choices=[('fin', 'Finished'),
-                                           ('disp_open', 'Disput Opened'),
-                                           ('open', 'Opened'),
+                                  choices=[('open', 'Case Opened'),
+                                           ('fin', 'Case Finished'),
+                                           ('disp_open', 'Dispute Opened'),
                                            ('disp_close', 'Dispute Closed')])
 
     def __str__(self):
